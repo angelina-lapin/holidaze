@@ -1,8 +1,13 @@
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import VenuePage from './pages/VenuePage';
+
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <h1 className="text-4xl text-accent font-bold">Holidaze ready!</h1>
-    </div>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/venue/:id" element={<VenuePage />} />
+    </Routes>
   );
 }
 
