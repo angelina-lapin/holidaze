@@ -4,9 +4,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { getVenueById } from '../api/holidaze';
 import ReactDatePicker from 'react-datepicker';
-import { parseISO } from 'date-fns';
+import { addDays, parseISO, differenceInCalendarDays } from 'date-fns';
 import 'react-datepicker/dist/react-datepicker.css';
-import { FaWifi, FaParking, FaUtensils, FaPaw } from 'react-icons/fa';
 
 export default function VenuePage() {
   const { id } = useParams();
@@ -14,8 +13,11 @@ export default function VenuePage() {
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [dateRange, setDateRange] = useState([null, null]);
-  const [startDate, endDate] = dateRange;
+  const [selectedRange, setSelectedRange] = useState({
+    startDate: null,
+    endDate: null,
+  });
+  const [showBookingForm, setShowBookingForm] = useState(false);
 
   useEffect(() => {
     async function fetchVenue() {
@@ -42,9 +44,26 @@ export default function VenuePage() {
     );
   }
 
-  const bookedDates = venue.bookings?.map((b) => parseISO(b.dateFrom)) || [];
   const images =
     venue.media?.filter((img) => img.url?.startsWith('http')) || [];
+  const bookedDates = venue.bookings?.map((b) => parseISO(b.dateFrom)) || [];
+  const numberOfNights =
+    selectedRange.startDate && selectedRange.endDate
+      ? differenceInCalendarDays(selectedRange.endDate, selectedRange.startDate)
+      : 0;
+  const totalPrice = numberOfNights * venue.price;
+
+  const handleDateChange = (dates) => {
+    const [start, end] = dates;
+    setSelectedRange({ startDate: start, endDate: end });
+    setShowBookingForm(false);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // here will be the booking logic
+    alert('Booking confirmed!');
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-secondary">
@@ -67,6 +86,7 @@ export default function VenuePage() {
               alt={images[activeImageIndex].alt || 'Venue image'}
               className="w-full h-64 object-cover rounded-md mb-4 transition duration-300 ease-in-out"
             />
+
             <div className="flex gap-2 mb-4 overflow-x-auto">
               {images.map((img, index) => (
                 <img
@@ -106,45 +126,111 @@ export default function VenuePage() {
           <ul className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-700">
             {venue.meta?.wifi && (
               <li className="flex items-center gap-2">
-                <FaWifi className="text-accent" /> WiFi
+                <i className="fa-solid fa-wifi text-accent"></i> WiFi
               </li>
             )}
             {venue.meta?.parking && (
               <li className="flex items-center gap-2">
-                <FaParking className="text-accent" /> Parking
+                <i className="fa-solid fa-square-parking text-accent"></i>{' '}
+                Parking
               </li>
             )}
             {venue.meta?.breakfast && (
               <li className="flex items-center gap-2">
-                <FaUtensils className="text-accent" /> Breakfast
+                <i className="fa-solid fa-mug-saucer text-accent"></i> Breakfast
               </li>
             )}
             {venue.meta?.pets && (
               <li className="flex items-center gap-2">
-                <FaPaw className="text-accent" /> Pets allowed
+                <i className="fa-solid fa-paw text-accent"></i> Pets allowed
               </li>
             )}
           </ul>
         </div>
 
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">Select your dates</h2>
-          <ReactDatePicker
-            selectsRange
-            startDate={startDate}
-            endDate={endDate}
-            onChange={(update) => {
-              setDateRange(update);
-            }}
-            minDate={new Date()}
-            excludeDates={bookedDates}
-            inline
-            dayClassName={(date) =>
-              bookedDates.some((d) => d.toDateString() === date.toDateString())
-                ? 'bg-red-200 text-gray-400'
-                : undefined
-            }
-          />
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Календарь */}
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold mb-2">Select dates</h2>
+              <ReactDatePicker
+                selected={selectedRange.startDate}
+                onChange={handleDateChange}
+                startDate={selectedRange.startDate}
+                endDate={selectedRange.endDate}
+                selectsRange
+                minDate={new Date()}
+                inline
+                excludeDates={bookedDates}
+                dayClassName={(date) =>
+                  bookedDates.some(
+                    (d) => d.toDateString() === date.toDateString()
+                  )
+                    ? 'bg-red-200 text-gray-400'
+                    : undefined
+                }
+              />
+            </div>
+
+            {/* Summary + форма */}
+            <div className="flex-1">
+              <h2 className="text-xl font-semibold mb-2">Booking summary</h2>
+              {selectedRange.startDate && selectedRange.endDate ? (
+                <div className="bg-white rounded shadow p-4 mb-4">
+                  <p>
+                    {numberOfNights} night{numberOfNights > 1 ? 's' : ''} x{' '}
+                    {venue.price} kr
+                  </p>
+                  <p className="font-bold mt-2">Total: {totalPrice} kr</p>
+                </div>
+              ) : (
+                <p className="text-sm text-muted mb-4">
+                  Please select dates to see summary.
+                </p>
+              )}
+
+              {showBookingForm && (
+                <form
+                  onSubmit={handleSubmit}
+                  className="bg-white rounded shadow p-4 space-y-4"
+                >
+                  <div>
+                    <label className="block text-sm font-medium">Name</label>
+                    <input
+                      type="text"
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">Email</label>
+                    <input
+                      type="email"
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-accent text-white py-2 px-4 rounded hover:opacity-90"
+                  >
+                    Confirm booking
+                  </button>
+                </form>
+              )}
+
+              {!showBookingForm &&
+                selectedRange.startDate &&
+                selectedRange.endDate && (
+                  <button
+                    onClick={() => setShowBookingForm(true)}
+                    className="w-full mt-4 bg-accent text-white py-2 px-4 rounded hover:opacity-90"
+                  >
+                    Book now
+                  </button>
+                )}
+            </div>
+          </div>
         </div>
       </main>
 
