@@ -5,7 +5,7 @@ import Hero from '../components/Hero';
 import VenueCard from '../components/VenueCard';
 import Footer from '../components/Footer';
 import SortBar from '../components/SortBar';
-import { getVenues } from '../api/holidaze'; // адаптируй путь под себя
+import { getVenues } from '../api/holidaze';
 
 export default function Home() {
   const [venues, setVenues] = useState([]);
