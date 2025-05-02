@@ -5,9 +5,7 @@ const AUTH_URL = `${API_BASE}/auth`;
 export async function login(email, password) {
   const response = await fetch(`${AUTH_URL}/login`, {
     method: 'POST',
-    headers: new Headers({
-      'Content-Type': 'application/json',
-    }),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
 
@@ -16,18 +14,15 @@ export async function login(email, password) {
     throw new Error(error.message || 'Login failed');
   }
 
-  const data = await response.json();
-  data.venueManager =
-    data.venueManager === true || data.venueManager === 'true';
-  return data;
+  return await response.json();
 }
 
 export async function register(name, email, password, venueManager = false) {
+  console.log('Registration body:', { name, email, password, venueManager });
+
   const response = await fetch(`${AUTH_URL}/register`, {
     method: 'POST',
-    headers: new Headers({
-      'Content-Type': 'application/json',
-    }),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, email, password, venueManager }),
   });
 
@@ -46,13 +41,12 @@ export async function logout() {
     throw new Error('No token found');
   }
 
-  const headers = new Headers({
-    Authorization: `Bearer ${token}`,
-  });
-
   const response = await fetch(`${AUTH_URL}/logout`, {
     method: 'POST',
-    headers,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
   });
 
   if (!response.ok) {
