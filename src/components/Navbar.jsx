@@ -30,24 +30,21 @@ export default function Navbar() {
 
         {/* Navigation Links */}
         <ul className="hidden md:flex space-x-6 font-medium">
-          <li
-            className="hover:underline hover:decoration-accent cursor-pointer"
-            onClick={() => navigate('/')}
-          >
-            Venues
-          </li>
-          <li
-            className="hover:underline hover:decoration-accent cursor-pointer"
-            onClick={() => navigate('/about')}
-          >
-            About
-          </li>
-          <li
-            className="hover:underline hover:decoration-accent cursor-pointer"
-            onClick={() => navigate('/contact')}
-          >
-            Contact
-          </li>
+          {[
+            { label: 'Venues', path: '/' },
+            { label: 'About', path: '/about' },
+            { label: 'Contact', path: '/contact' },
+          ].map(({ label, path }) => (
+            <li
+              key={path}
+              onClick={() => navigate(path)}
+              className={`cursor-pointer hover:underline hover:decoration-accent ${
+                location.pathname === path ? 'text-accent font-semibold' : ''
+              }`}
+            >
+              {label}
+            </li>
+          ))}
         </ul>
 
         {/* Auth Buttons */}
@@ -71,7 +68,11 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               <div
                 className="cursor-pointer flex items-center gap-2"
-                onClick={() => navigate('/profile')}
+                onClick={() =>
+                  navigate(
+                    user.venueManager ? '/manager-profile' : '/user-profile'
+                  )
+                }
               >
                 <img
                   src={user.avatar?.url || 'https://via.placeholder.com/32'}
