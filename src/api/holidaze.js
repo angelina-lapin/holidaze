@@ -1,3 +1,4 @@
+import { getHeaders } from './headers';
 const BASE_URL = 'https://v2.api.noroff.dev/holidaze';
 
 export async function getVenues() {
@@ -16,7 +17,7 @@ export async function getVenues() {
 
 export async function getVenueById(id) {
   try {
-    const response = await fetch(`${BASE_URL}/venues/${id}`);
+    const response = await fetch(`${BASE_URL}/venues/${id}?_bookings=true`);
     if (!response.ok) {
       throw new Error('Failed to fetch venue');
     }
@@ -26,4 +27,100 @@ export async function getVenueById(id) {
     console.error('Error fetching venue by id:', error);
     return null;
   }
+}
+
+export async function createBooking({ dateFrom, dateTo, guests, venueId }) {
+  console.log('Sending booking with:', { dateFrom, dateTo, guests, venueId });
+
+  const response = await fetch(`${BASE_URL}/bookings`, {
+    method: 'POST',
+    headers: getHeaders(),
+    body: JSON.stringify({
+      dateFrom,
+      dateTo,
+      guests,
+      venueId,
+    }),
+  });
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || 'Booking failed');
+  }
+
+  const existingMap = JSON.parse(localStorage.getItem('bookingVenues') || '{}');
+  existingMap[result.data.id] = venueId;
+  localStorage.setItem('bookingVenues', JSON.stringify(existingMap));
+
+  return result.data;
+}
+
+export async function getBookingsByProfile(profileName) {
+  const response = await fetch(`${BASE_URL}/profiles/${profileName}/bookings`, {
+    headers: getHeaders(),
+  });
+
+  const data = await response.json();
+  console.log('Fetched bookings:', data.data);
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch bookings');
+  }
+
+  return data.data;
+}
+
+export async function getEnrichedBookings(profileName) {
+  const bookings = await getBookingsByProfile(profileName);
+  console.log('Fetched bookings:', bookings);
+
+  const venueMap = JSON.parse(localStorage.getItem('bookingVenues') || '{}');
+
+  const enrichedBookings = await Promise.all(
+    bookings.map(async (booking) => {
+      let venueId =
+        booking.venueId || booking.venue?.id || venueMap[booking.id];
+
+      if (!venueId) {
+        console.warn(`Booking ${booking.id} has no venue`);
+        return { ...booking, venue: null };
+      }
+
+      try {
+        const venue = await getVenueById(venueId);
+        return { ...booking, venue };
+      } catch (error) {
+        console.error(`Failed to enrich booking ${booking.id}`, error);
+        return { ...booking, venue: null };
+      }
+    })
+  );
+
+  console.log('Enriched bookings:', enrichedBookings);
+  return enrichedBookings;
+}
+
+export async function updateProfileAvatar(profileName, avatarUrl, avatarAlt) {
+  const response = await fetch(
+    `https://v2.api.noroff.dev/holidaze/profiles/${profileName}`,
+    {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        avatar: {
+          url: avatarUrl,
+          alt: avatarAlt,
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to update avatar');
+  }
+
+  const data = await response.json();
+  return data.data;
 }

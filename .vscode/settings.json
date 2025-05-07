@@ -8,5 +8,8 @@
   "prettier.enableDebugLogs": false,
   "files.exclude": {
     "**/node_modules": true
-  }
+  },
+  "css.validate": false,
+  "scss.validate": false,
+  "less.validate": false
 }

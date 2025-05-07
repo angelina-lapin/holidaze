@@ -1,11 +1,13 @@
+import '../index.css';
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import Modal from '../components/Modal';
 import { getVenueById } from '../api/holidaze';
+import { handleBookingSubmit } from '../utils/handleBooking';
 import ReactDatePicker from 'react-datepicker';
 import { addDays, parseISO, differenceInCalendarDays } from 'date-fns';
-import Modal from '../components/Modal';
 
 export default function VenuePage() {
   const { id } = useParams();
@@ -14,29 +16,43 @@ export default function VenuePage() {
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedRange, setSelectedRange] = useState([null, null]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [showBookingForm, setShowBookingForm] = useState(false);
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    onClose: null,
+  });
+  const [guests, setGuests] = useState(1);
 
   const [startDate, endDate] = selectedRange;
 
   useEffect(() => {
     async function fetchVenue() {
       const data = await getVenueById(id);
+      console.log('Fetched venue:', data);
       setVenue(data);
       setLoading(false);
     }
     fetchVenue();
   }, [id]);
 
-  function handleBookingSubmit(e) {
-    e.preventDefault();
+  const onSubmit = (e) => {
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!user) {
-      setIsModalOpen(true);
-      return;
-    }
-    // booking logic goes here
-  }
+    handleBookingSubmit({
+      e,
+      user,
+      venueId: venue.id,
+      startDate,
+      endDate,
+      guests,
+      bookedDates,
+      setModal,
+      setShowBookingForm,
+      setSelectedRange,
+      navigate,
+    });
+  };
 
   if (loading) {
     return (
@@ -92,7 +108,6 @@ export default function VenuePage() {
               alt={images[activeImageIndex].alt || 'Venue image'}
               className="w-full h-64 object-cover rounded-md mb-4 transition duration-300 ease-in-out"
             />
-
             <div className="flex gap-2 mb-4 overflow-x-auto">
               {images.map((img, index) => (
                 <img
@@ -118,11 +133,9 @@ export default function VenuePage() {
         )}
 
         <p className="text-muted mb-4">{venue.description}</p>
-
         <div className="text-sm text-gray-600 mb-2">
           Location: {venue.location?.city}, {venue.location?.country}
         </div>
-
         <div className="text-lg font-semibold text-accent mb-6">
           kr {venue.price} / night
         </div>
@@ -156,7 +169,6 @@ export default function VenuePage() {
 
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row gap-8">
-            {/* Календарь */}
             <div className="flex-1">
               <h2 className="text-xl font-semibold mb-2">Select dates</h2>
               <ReactDatePicker
@@ -168,17 +180,17 @@ export default function VenuePage() {
                 minDate={new Date()}
                 inline
                 excludeDates={bookedDates}
-                dayClassName={(date) =>
-                  bookedDates.some(
+                dayClassName={(date) => {
+                  const isBooked = bookedDates.some(
                     (d) => d.toDateString() === date.toDateString()
-                  )
-                    ? 'bg-red-200 text-gray-400'
-                    : undefined
-                }
+                  );
+                  return isBooked
+                    ? 'react-datepicker__day booked-date'
+                    : undefined;
+                }}
               />
             </div>
 
-            {/* Summary + форма */}
             <div className="flex-1">
               <h2 className="text-xl font-semibold mb-2">Booking summary</h2>
               {startDate && endDate ? (
@@ -197,7 +209,7 @@ export default function VenuePage() {
 
               {showBookingForm && (
                 <form
-                  onSubmit={handleBookingSubmit}
+                  onSubmit={onSubmit}
                   className="bg-white rounded shadow p-4 space-y-4"
                 >
                   <div>
@@ -212,6 +224,17 @@ export default function VenuePage() {
                     <label className="block text-sm font-medium">Email</label>
                     <input
                       type="email"
+                      required
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium">Guests</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={guests}
+                      onChange={(e) => setGuests(Number(e.target.value))}
                       required
                       className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
                     />
@@ -241,13 +264,15 @@ export default function VenuePage() {
       <Footer />
 
       <Modal
-        isOpen={isModalOpen}
+        isOpen={modal.isOpen}
         onClose={() => {
-          setIsModalOpen(false);
-          navigate('/');
+          setModal((prev) => {
+            if (prev.onClose) prev.onClose();
+            return { ...prev, isOpen: false };
+          });
         }}
-        title="Login required"
-        message="Please log in to book this venue."
+        title={modal.title}
+        message={modal.message}
       />
     </div>
   );

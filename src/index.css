@@ -5,6 +5,10 @@
 body {
   @apply bg-secondary text-dark font-sans;
 }
+.react-datepicker__header {
+  background-color: transparent !important;
+  border-bottom: 1px solid #e5989b !important;
+}
 
 .react-datepicker {
   background-color: white;
@@ -25,11 +29,6 @@ body {
 .react-datepicker__day-name {
   color: #6d6875;
   font-weight: 500;
-}
-
-.react-datepicker__header {
-  background-color: transparent;
-  border-bottom: none;
 }
 
 .react-datepicker__day--selected,
@@ -87,4 +86,12 @@ input:focus {
   outline: none;
   box-shadow: none;
   border-color: #e5989b;
+}
+
+.booked-date {
+  background-color: #fee2e2 !important;
+  color: #9ca3af !important;
+  text-decoration: line-through !important;
+  pointer-events: none !important;
+  border-radius: 0.3rem !important;
 }

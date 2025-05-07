@@ -1,114 +1,118 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getEnrichedBookings } from '../api/holidaze';
+import { handleAvatarUpdate } from '../utils/handleAvatarUpdate';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { API_BASE } from '../api/constants';
-import { getHeaders } from '../api/headers';
+import Modal from '../components/Modal';
 
 export default function UserProfilePage() {
   const [user, setUser] = useState(null);
-  const [avatarUrl, setAvatarUrl] = useState('');
   const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
+  const [newAvatar, setNewAvatar] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    const storedUser = JSON.parse(localStorage.getItem('user'));
     if (!storedUser) {
       navigate('/login');
-      return;
+    } else {
+      setUser(storedUser);
+      getEnrichedBookings(storedUser.name)
+        .then(setBookings)
+        .catch((err) => console.error('Failed to load bookings', err))
+        .finally(() => setLoading(false));
     }
-
-    const parsedUser = JSON.parse(storedUser);
-    setUser(parsedUser);
-    setAvatarUrl(parsedUser.avatar?.url || 'https://via.placeholder.com/150');
-
-    async function fetchBookings() {
-      try {
-        const res = await fetch(
-          `${API_BASE}/holidaze/profiles/${parsedUser.name}/bookings`,
-          {
-            headers: getHeaders(),
-          }
-        );
-
-        if (!res.ok) {
-          throw new Error('Failed to fetch bookings');
-        }
-
-        const data = await res.json();
-        setBookings(data.data);
-      } catch (error) {
-        console.error('Error fetching bookings:', error);
-      }
-    }
-
-    fetchBookings();
   }, [navigate]);
 
-  function handleAvatarChange(e) {
-    const newUrl = e.target.value;
-    setAvatarUrl(newUrl);
-    setUser((prev) => ({ ...prev, avatar: { url: newUrl } }));
-    localStorage.setItem(
-      'user',
-      JSON.stringify({ ...user, avatar: { url: newUrl } })
-    );
-  }
-
   if (!user) return null;
+
+  function handleAvatarChangeSubmit(e) {
+    e.preventDefault();
+    handleAvatarUpdate({
+      user,
+      avatarUrl: newAvatar,
+      setUser,
+      setModal,
+    });
+    setNewAvatar('');
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-secondary">
       <Navbar />
-      <main className="flex-grow max-w-3xl mx-auto px-4 py-8">
+      <main className="flex-grow max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Welcome, {user.name}!</h1>
 
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-2">Profile</h2>
-          <div className="flex items-center gap-4">
-            <img
-              src={avatarUrl}
-              alt="avatar"
-              className="w-24 h-24 rounded-full object-cover border"
+        <div className="mb-8 flex items-center gap-4">
+          <img
+            src={user.avatar?.url || 'https://via.placeholder.com/100'}
+            alt="avatar"
+            className="w-24 h-24 rounded-full object-cover border"
+          />
+          <form onSubmit={handleAvatarChangeSubmit} className="flex gap-2">
+            <input
+              type="url"
+              placeholder="New avatar URL"
+              value={newAvatar}
+              onChange={(e) => setNewAvatar(e.target.value)}
+              required
+              className="border rounded px-3 py-1 w-64"
             />
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Update Avatar URL:
-              </label>
-              <input
-                type="url"
-                value={avatarUrl}
-                onChange={handleAvatarChange}
-                className="w-full max-w-xs border border-gray-300 rounded px-3 py-2"
-              />
-            </div>
-          </div>
-        </section>
+            <button
+              type="submit"
+              className="bg-accent text-white px-4 py-1 rounded hover:opacity-90"
+            >
+              Update
+            </button>
+          </form>
+        </div>
 
-        <section>
-          <h2 className="text-xl font-semibold mb-4">Your Bookings</h2>
-          {bookings.length > 0 ? (
-            <ul className="space-y-4">
-              {bookings.map((booking) => (
-                <li
-                  key={booking.id}
-                  className="border rounded p-4 bg-white shadow-sm"
-                >
-                  <p className="font-medium">{booking.venue.name}</p>
-                  <p className="text-sm text-gray-600">
-                    From: {new Date(booking.dateFrom).toLocaleDateString()}{' '}
-                    <br />
-                    To: {new Date(booking.dateTo).toLocaleDateString()}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="text-muted">You have no upcoming bookings.</p>
-          )}
-        </section>
+        <p className="mb-2 text-gray-600">Email: {user.email}</p>
+        <p className="mb-6 text-gray-600">
+          Role: {user.venueManager ? 'Venue Manager' : 'Customer'}
+        </p>
+
+        <h2 className="text-2xl font-semibold mb-4">Upcoming bookings</h2>
+        {loading ? (
+          <p>Loading bookings...</p>
+        ) : bookings.length > 0 ? (
+          <ul className="space-y-4">
+            {bookings.map((booking) => (
+              <li key={booking.id} className="bg-white shadow rounded p-4">
+                {booking.venue?.name ? (
+                  <h3
+                    className="text-xl font-semibold text-accent hover:underline cursor-pointer"
+                    onClick={() => navigate(`/venue/${booking.venue.id}`)}
+                  >
+                    {booking.venue.name}
+                  </h3>
+                ) : (
+                  <h3 className="text-xl font-semibold text-gray-400">
+                    Unknown Venue
+                  </h3>
+                )}
+
+                <p className="text-sm text-gray-600">
+                  From: {new Date(booking.dateFrom).toLocaleDateString()} – To:{' '}
+                  {new Date(booking.dateTo).toLocaleDateString()}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No bookings found.</p>
+        )}
       </main>
       <Footer />
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={() => setModal({ ...modal, isOpen: false })}
+        title={modal.title}
+        message={modal.message}
+      />
     </div>
   );
 }
