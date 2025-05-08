@@ -124,3 +124,19 @@ export async function updateProfileAvatar(profileName, avatarUrl, avatarAlt) {
   const data = await response.json();
   return data.data;
 }
+
+export async function deleteBooking(id) {
+  const response = await fetch(
+    `https://v2.api.noroff.dev/holidaze/bookings/${id}`,
+    {
+      method: 'DELETE',
+      headers: getHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to delete booking');
+  }
+
+  return true;
+}
