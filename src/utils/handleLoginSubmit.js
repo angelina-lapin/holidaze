@@ -1,23 +1,25 @@
 import { login } from '../api/auth';
-import { getHeaders } from '../api/headers';
-import { API_BASE } from '../api/constants';
+import { API_BASE, API_KEY } from '../api/constants';
+import { setUser, setToken } from '../utils/storage';
 
 export async function handleLoginSubmit(email, password, setModal, navigate) {
   try {
-    const user = await login(email, password);
-    const userData = user.data || user;
+    const loginRes = await login(email, password);
+    const loginData = loginRes.data || loginRes;
 
-    const name = userData.name;
-    const token = userData.accessToken;
+    const name = loginData.name;
+    const token = loginData.accessToken;
 
     if (!name || !token) {
-      throw new Error('Invalid user data returned from server');
+      throw new Error('Invalid login response');
     }
 
-    localStorage.setItem('user', JSON.stringify(userData));
-
     const profileRes = await fetch(`${API_BASE}/holidaze/profiles/${name}`, {
-      headers: getHeaders(),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        'X-Noroff-API-Key': API_KEY,
+      },
     });
 
     if (!profileRes.ok) {
@@ -26,11 +28,15 @@ export async function handleLoginSubmit(email, password, setModal, navigate) {
 
     const profileData = await profileRes.json();
 
-    const isManager =
-      profileData.data?.venueManager === true ||
-      profileData.data?.venueManager === 'true';
+    const fullUser = {
+      ...loginData,
+      ...profileData.data,
+    };
 
-    navigate(isManager ? '/manager-profile' : '/user-profile');
+    setUser(fullUser);
+    setToken(token);
+
+    navigate(fullUser.venueManager ? '/manager-profile' : '/user-profile');
   } catch (error) {
     console.error('Login error:', error);
     setModal({

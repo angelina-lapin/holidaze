@@ -1,5 +1,5 @@
 import { getHeaders } from './headers';
-const BASE_URL = 'https://v2.api.noroff.dev/holidaze';
+import { BASE_URL } from './constants';
 
 export async function getVenues() {
   try {
@@ -102,19 +102,16 @@ export async function getEnrichedBookings(profileName) {
 }
 
 export async function updateProfileAvatar(profileName, avatarUrl, avatarAlt) {
-  const response = await fetch(
-    `https://v2.api.noroff.dev/holidaze/profiles/${profileName}`,
-    {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify({
-        avatar: {
-          url: avatarUrl,
-          alt: avatarAlt,
-        },
-      }),
-    }
-  );
+  const response = await fetch(`${BASE_URL}/profiles/${profileName}`, {
+    method: 'PUT',
+    headers: getHeaders(),
+    body: JSON.stringify({
+      avatar: {
+        url: avatarUrl,
+        alt: avatarAlt,
+      },
+    }),
+  });
 
   if (!response.ok) {
     const errorData = await response.json();
@@ -126,13 +123,10 @@ export async function updateProfileAvatar(profileName, avatarUrl, avatarAlt) {
 }
 
 export async function deleteBooking(id) {
-  const response = await fetch(
-    `https://v2.api.noroff.dev/holidaze/bookings/${id}`,
-    {
-      method: 'DELETE',
-      headers: getHeaders(),
-    }
-  );
+  const response = await fetch(`${BASE_URL}/bookings/${id}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
 
   if (!response.ok) {
     throw new Error('Failed to delete booking');

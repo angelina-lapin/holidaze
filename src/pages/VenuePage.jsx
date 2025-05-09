@@ -8,6 +8,7 @@ import { getVenueById } from '../api/holidaze';
 import { handleBookingSubmit } from '../utils/handleBooking';
 import ReactDatePicker from 'react-datepicker';
 import { addDays, parseISO, differenceInCalendarDays } from 'date-fns';
+import { getUser } from '../utils/storage';
 
 export default function VenuePage() {
   const { id } = useParams();
@@ -38,7 +39,7 @@ export default function VenuePage() {
   }, [id]);
 
   const onSubmit = (e) => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    const user = getUser();
     handleBookingSubmit({
       e,
       user,

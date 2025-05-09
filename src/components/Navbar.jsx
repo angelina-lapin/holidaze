@@ -1,18 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { getUser, removeUser } from '../utils/storage';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(getUser());
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    setUser(storedUser ? JSON.parse(storedUser) : null);
+    setUser(getUser());
   }, [location]);
 
   function handleLogout() {
-    localStorage.removeItem('user');
+    removeUser();
     setUser(null);
     navigate('/');
   }

@@ -1,6 +1,11 @@
-import { API_BASE } from './constants';
-
-const AUTH_URL = `${API_BASE}/auth`;
+import { AUTH_URL } from './constants';
+import {
+  setUser,
+  setToken,
+  removeUser,
+  removeToken,
+  getToken,
+} from '../utils/storage';
 
 export async function login(email, password) {
   const response = await fetch(`${AUTH_URL}/login`, {
@@ -9,12 +14,15 @@ export async function login(email, password) {
     body: JSON.stringify({ email, password }),
   });
 
+  const data = await response.json();
+
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Login failed');
+    throw new Error(data.message || 'Login failed');
   }
 
-  return await response.json();
+  setUser(data);
+  setToken(data.accessToken);
+  return data;
 }
 
 export async function register(name, email, password, venueManager = false) {
@@ -35,8 +43,7 @@ export async function register(name, email, password, venueManager = false) {
 }
 
 export async function logout() {
-  const token = JSON.parse(localStorage.getItem('user'))?.accessToken;
-
+  const token = getToken();
   if (!token) {
     throw new Error('No token found');
   }
@@ -53,5 +60,6 @@ export async function logout() {
     throw new Error('Logout failed');
   }
 
-  localStorage.removeItem('user');
+  removeUser();
+  removeToken();
 }

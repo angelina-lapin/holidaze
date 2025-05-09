@@ -1,14 +1,8 @@
 import { API_KEY } from './constants';
+import { getToken } from '../utils/storage';
 
 export function getHeaders() {
-  const user = localStorage.getItem('user');
-  let token;
-
-  try {
-    token = JSON.parse(user)?.accessToken;
-  } catch (error) {
-    console.error('Failed to parse token from localStorage');
-  }
+  const token = getToken();
 
   const headers = new Headers();
   headers.set('Content-Type', 'application/json');
