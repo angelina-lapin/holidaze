@@ -134,3 +134,19 @@ export async function deleteBooking(id) {
 
   return true;
 }
+
+export async function getVenuesByManager(managerName) {
+  const response = await fetch(
+    `${BASE_URL}/profiles/${managerName}/venues?_bookings=true`,
+    {
+      headers: getHeaders(),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch venues for manager');
+  }
+
+  const data = await response.json();
+  return data.data;
+}
