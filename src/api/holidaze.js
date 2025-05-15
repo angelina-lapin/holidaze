@@ -150,3 +150,19 @@ export async function getVenuesByManager(managerName) {
   const data = await response.json();
   return data.data;
 }
+
+export async function getBookingsByVenueId(venueId) {
+  const headers = getHeaders();
+
+  const response = await fetch(`${BASE_URL}/venues/${venueId}/bookings`, {
+    headers,
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to fetch bookings');
+  }
+
+  const result = await response.json();
+  return result.data;
+}

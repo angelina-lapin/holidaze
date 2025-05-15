@@ -9,6 +9,7 @@ export async function handleConfirmBooking({
   setShowBookingForm,
   setSelectedRange,
   navigate,
+  user,
 }) {
   try {
     console.log('Creating booking (confirm):', {
@@ -20,11 +21,15 @@ export async function handleConfirmBooking({
 
     await createBooking({ venueId, dateFrom, dateTo, guests });
 
+    const redirectPath = user?.venueManager
+      ? '/manager-profile'
+      : '/user-profile';
+
     setModal({
       isOpen: true,
       title: 'Booking successful',
       message: 'Your booking was created successfully!',
-      onClose: () => navigate('/user-profile'),
+      onClose: () => navigate(redirectPath),
     });
 
     if (setShowBookingForm) setShowBookingForm(false);
@@ -80,18 +85,22 @@ export async function handleBookingSubmit({
   });
 
   try {
-    const booking = await createBooking({
+    await createBooking({
       venueId,
       dateFrom: startDate.toISOString(),
       dateTo: endDate.toISOString(),
       guests,
     });
 
+    const redirectPath = user?.venueManager
+      ? '/manager-profile'
+      : '/user-profile';
+
     setModal({
       isOpen: true,
       title: 'Booking successful',
       message: 'Your booking was created successfully!',
-      onClose: () => navigate('/user-profile'),
+      onClose: () => navigate(redirectPath),
     });
 
     setShowBookingForm(false);

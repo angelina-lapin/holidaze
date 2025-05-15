@@ -5,11 +5,11 @@ import { handleAvatarUpdate } from '../utils/handleAvatarUpdate';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Modal from '../components/Modal';
-import { handleDeleteBooking } from '../utils/handleDeleteBooking';
+import BookingList from '../components/BookingList';
 
 export default function UserProfilePage() {
   const [user, setUser] = useState(null);
-  const [bookings, setBookings] = useState([]);
+  const [myBookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState({
     isOpen: false,
@@ -20,7 +20,6 @@ export default function UserProfilePage() {
   });
   const [newAvatar, setNewAvatar] = useState('');
   const navigate = useNavigate();
-  const [pendingBookingId, setPendingBookingId] = useState(null);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -84,62 +83,13 @@ export default function UserProfilePage() {
         </p>
 
         <h2 className="text-2xl font-semibold mb-4">Upcoming bookings</h2>
-        {loading ? (
-          <p>Loading bookings...</p>
-        ) : bookings.length > 0 ? (
-          <ul className="space-y-4">
-            {bookings.map((booking) => (
-              <li key={booking.id} className="bg-white shadow rounded p-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    {booking.venue?.name ? (
-                      <h3
-                        className="text-xl font-semibold text-accent hover:underline cursor-pointer"
-                        onClick={() => navigate(`/venue/${booking.venue.id}`)}
-                      >
-                        {booking.venue.name}
-                      </h3>
-                    ) : (
-                      <h3 className="text-xl font-semibold text-gray-400">
-                        Unknown Venue
-                      </h3>
-                    )}
-
-                    <p className="text-sm text-gray-600">
-                      From: {new Date(booking.dateFrom).toLocaleDateString()} –
-                      To: {new Date(booking.dateTo).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      setModal({
-                        isOpen: true,
-                        title: 'Cancel Booking',
-                        message:
-                          'Are you sure you want to cancel this booking?',
-                        type: 'confirm',
-                        onConfirm: () => {
-                          handleDeleteBooking({
-                            bookingId: booking.id,
-                            profileName: user?.name,
-                            setBookings,
-                            setModal,
-                          });
-                        },
-                      })
-                    }
-                    className="bg-gray-400 text-white px-3 py-1 rounded hover:bg-gray-500 transition"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>No bookings found.</p>
-        )}
+        <BookingList
+          bookings={myBookings}
+          loading={loading}
+          user={user}
+          setModal={setModal}
+          setBookings={setBookings}
+        />
       </main>
       <Footer />
       <Modal
