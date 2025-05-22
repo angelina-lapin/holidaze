@@ -38,9 +38,6 @@ export async function handleUpdateVenue(
         : [],
     };
 
-    console.log('Updating venue ID:', venueId);
-    console.log('Payload being sent:', payload);
-
     const response = await fetch(`${BASE_URL}/venues/${venueId}`, {
       method: 'PUT',
       headers,
@@ -52,7 +49,6 @@ export async function handleUpdateVenue(
     }
 
     const result = await response.json();
-    console.log('Updated venue:', result);
 
     setVenues((prev) => prev.map((v) => (v.id === venueId ? result.data : v)));
 

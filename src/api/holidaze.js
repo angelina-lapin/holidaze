@@ -30,8 +30,6 @@ export async function getVenueById(id) {
 }
 
 export async function createBooking({ dateFrom, dateTo, guests, venueId }) {
-  console.log('Sending booking with:', { dateFrom, dateTo, guests, venueId });
-
   const response = await fetch(`${BASE_URL}/bookings`, {
     method: 'POST',
     headers: getHeaders(),
@@ -62,7 +60,6 @@ export async function getBookingsByProfile(profileName) {
   });
 
   const data = await response.json();
-  console.log('Fetched bookings:', data.data);
 
   if (!response.ok) {
     throw new Error('Failed to fetch bookings');
@@ -73,7 +70,6 @@ export async function getBookingsByProfile(profileName) {
 
 export async function getEnrichedBookings(profileName) {
   const bookings = await getBookingsByProfile(profileName);
-  console.log('Fetched bookings:', bookings);
 
   const venueMap = JSON.parse(localStorage.getItem('bookingVenues') || '{}');
 
@@ -97,7 +93,6 @@ export async function getEnrichedBookings(profileName) {
     })
   );
 
-  console.log('Enriched bookings:', enrichedBookings);
   return enrichedBookings;
 }
 

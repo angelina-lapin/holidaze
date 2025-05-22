@@ -5,6 +5,8 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import UserProfilePage from './pages/UserProfilePage';
 import ManagerProfile from './pages/ManagerProfile';
+import About from './pages/About';
+import Contact from './pages/Contact';
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/user-profile" element={<UserProfilePage />} />
       <Route path="/manager-profile" element={<ManagerProfile />} />{' '}
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
     </Routes>
   );
 }

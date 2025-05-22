@@ -55,7 +55,6 @@ export async function handleSubmit(
     }
 
     const created = await response.json();
-    console.log('Created venue:', created);
 
     const updatedVenues = await getVenuesByManager(user.name);
     setVenues(updatedVenues);

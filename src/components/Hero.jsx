@@ -1,21 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { handleSearch, handleClear } from '../utils/handleSearchHelpers';
 
 export default function Hero() {
   const [location, setLocation] = useState('');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-
-  function handleSearch() {
-    if (location.trim()) {
-      navigate(`/?location=${encodeURIComponent(location.trim())}`);
-    }
-  }
-
-  function handleClear() {
-    setLocation('');
-    navigate('/');
-  }
 
   return (
     <section
@@ -36,14 +26,14 @@ export default function Hero() {
             className="flex-1 px-4 py-2 rounded-md text-black border focus:outline-none focus:ring-2 focus:ring-accent"
           />
           <button
-            onClick={handleSearch}
+            onClick={() => handleSearch(location, navigate)}
             className="bg-accent text-white px-4 py-2 rounded-md hover:opacity-90 transition"
           >
             Search
           </button>
           {searchParams.get('location') && (
             <button
-              onClick={handleClear}
+              onClick={() => handleClear(setLocation, navigate)}
               className="text-accent border border-accent bg-white px-4 py-2 rounded-md hover:bg-accent hover:text-white transition"
             >
               Clear

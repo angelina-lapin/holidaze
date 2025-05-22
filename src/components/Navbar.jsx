@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getUser, removeUser } from '../utils/storage';
+import { getUser } from '../utils/storage';
+import { handleLogout } from '../utils/handleLogout';
+import { handleProfileClick } from '../utils/handleProfileClick';
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -10,20 +12,6 @@ export default function Navbar() {
   useEffect(() => {
     setUser(getUser());
   }, [location]);
-
-  function handleLogout() {
-    removeUser();
-    setUser(null);
-    navigate('/');
-  }
-
-  function handleProfileClick() {
-    if (user?.venueManager) {
-      navigate('/manager-profile');
-    } else {
-      navigate('/user-profile');
-    }
-  }
 
   return (
     <header className="bg-primary text-white shadow-md">
@@ -76,7 +64,7 @@ export default function Navbar() {
             <div className="flex items-center gap-3">
               <div
                 className="cursor-pointer flex items-center gap-2"
-                onClick={handleProfileClick}
+                onClick={() => handleProfileClick(user, navigate)}
               >
                 <img
                   src={user.avatar?.url || 'https://via.placeholder.com/32'}
@@ -86,7 +74,7 @@ export default function Navbar() {
                 <span className="font-medium">{user.name}</span>
               </div>
               <button
-                onClick={handleLogout}
+                onClick={() => handleLogout(setUser, navigate)}
                 className="text-white border border-white px-3 py-1 rounded-md hover:bg-white hover:text-primary transition"
               >
                 Logout

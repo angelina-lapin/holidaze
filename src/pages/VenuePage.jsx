@@ -31,7 +31,6 @@ export default function VenuePage() {
   useEffect(() => {
     async function fetchVenue() {
       const data = await getVenueById(id);
-      console.log('Fetched venue:', data);
       setVenue(data);
       setLoading(false);
     }

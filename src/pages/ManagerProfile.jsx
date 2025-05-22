@@ -6,10 +6,11 @@ import BookingList from '../components/BookingList';
 import { useNavigate } from 'react-router-dom';
 import { getUser } from '../utils/storage';
 import { getVenuesByManager, getEnrichedBookings } from '../api/holidaze';
-import { handleSubmit } from '../utils/handleSubmit';
-import { handleUpdateVenue } from '../utils/handleUpdateVenue';
 import { handleDeleteVenue } from '../utils/handleDeleteVenue';
-import { handleAvatarUpdate } from '../utils/handleAvatarUpdate';
+import { handleAvatarChangeSubmit } from '../utils/handleAvatarChangeSubmit';
+import { handleEditClick } from '../utils/handleEditClick';
+import { resetVenueForm } from '../utils/resetVenueForm';
+import { handleFormSubmit } from '../utils/handleFormSubmit';
 
 export default function ManagerProfile() {
   const navigate = useNavigate();
@@ -46,88 +47,40 @@ export default function ManagerProfile() {
       .finally(() => setLoading(false));
   }, [user]);
 
-  function handleAvatarChangeSubmit(e) {
-    e.preventDefault();
-    if (!user) return;
-
-    handleAvatarUpdate({ user, avatarUrl: newAvatar, setUser, setModal });
-    setNewAvatar('');
-  }
-
-  function handleEditClick(venue) {
-    setNewVenue({
-      name: venue.name,
-      description: venue.description,
-      media: venue.media || [],
-      price: venue.price,
-      maxGuests: venue.maxGuests,
-      rating: venue.rating || '',
-      location: venue.location || { address: '', city: '', country: '' },
-      meta: venue.meta || {
-        wifi: false,
-        parking: false,
-        breakfast: false,
-        pets: false,
-      },
-    });
-    setEditingVenueId(venue.id);
-    setShowForm(true);
-  }
-
-  function resetVenueForm() {
-    setNewVenue({
-      name: '',
-      description: '',
-      media: [],
-      price: '',
-      maxGuests: '',
-      rating: '',
-      location: { address: '', city: '', country: '' },
-      meta: { wifi: false, parking: false, breakfast: false, pets: false },
-    });
-    setMediaInput('');
-    setEditingVenueId(null);
-  }
-
-  function handleFormSubmit(e) {
-    if (editingVenueId) {
-      handleUpdateVenue(
-        e,
-        editingVenueId,
-        newVenue,
-        setEditingVenueId,
-        setShowForm,
-        setNewVenue,
-        setVenues,
-        setModal
-      );
-    } else {
-      handleSubmit(e, newVenue, setShowForm, setNewVenue, setVenues);
-    }
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-secondary">
       <Navbar />
-      <main className="flex-grow max-w-4xl mx-auto px-4 py-8">
+      <main className="flex-grow max-w-4xl mx-auto px-4 py-8 w-full">
         <h1 className="text-3xl font-bold mb-6">
           Welcome, {user?.name || 'Venue Manager'}!
         </h1>
 
-        <div className="mb-6 flex items-center gap-4">
+        <div className="mb-6 flex flex-col sm:flex-row items-center gap-4 w-full">
           <img
             src={user.avatar?.url || 'https://via.placeholder.com/100'}
             alt="avatar"
-            className="w-24 h-24 rounded-full object-cover border"
+            className="w-24 h-24 max-w-full rounded-full object-cover border"
           />
-          <form onSubmit={handleAvatarChangeSubmit} className="flex gap-2">
+          <form
+            onSubmit={(e) =>
+              handleAvatarChangeSubmit({
+                e,
+                user,
+                newAvatar,
+                setUser,
+                setModal,
+                setNewAvatar,
+              })
+            }
+            className="flex flex-col sm:flex-row gap-2 w-full"
+          >
             <input
               type="url"
               placeholder="New avatar URL"
               value={newAvatar}
               onChange={(e) => setNewAvatar(e.target.value)}
               required
-              className="border rounded px-3 py-1 w-64"
+              className="border rounded px-3 py-1 w-full sm:w-64"
             />
             <button
               type="submit"
@@ -137,6 +90,11 @@ export default function ManagerProfile() {
             </button>
           </form>
         </div>
+
+        <p className="mb-2 text-gray-600">Email: {user.email}</p>
+        <p className="mb-6 text-gray-600">
+          Role: {user.venueManager ? 'Venue Manager' : 'Customer'}
+        </p>
 
         <h2 className="text-2xl font-semibold mt-10 mb-4">Your Venues</h2>
         {loading ? (
@@ -163,13 +121,22 @@ export default function ManagerProfile() {
                 <div className="flex gap-2 mb-2">
                   <button
                     className="bg-accent text-white px-4 py-1 rounded hover:opacity-90 text-sm"
-                    onClick={() => handleEditClick(venue)}
+                    onClick={() =>
+                      handleEditClick(
+                        venue,
+                        setNewVenue,
+                        setEditingVenueId,
+                        setShowForm
+                      )
+                    }
                   >
                     Edit
                   </button>
                   <button
                     className="bg-gray-400 text-white px-4 py-1 rounded hover:bg-gray-500 text-sm"
-                    onClick={() => handleDeleteVenue(venue.id, setVenues)}
+                    onClick={() =>
+                      handleDeleteVenue(venue.id, setVenues, setModal)
+                    }
                   >
                     Delete
                   </button>
@@ -195,7 +162,7 @@ export default function ManagerProfile() {
         )}
         <button
           onClick={() => {
-            resetVenueForm();
+            resetVenueForm(setNewVenue, setMediaInput, setEditingVenueId);
             setShowForm(!showForm);
           }}
           className="mt-6 mb-6 bg-accent text-white py-2 px-4 rounded hover:opacity-90"
@@ -204,7 +171,21 @@ export default function ManagerProfile() {
         </button>
 
         {showForm && (
-          <form onSubmit={handleFormSubmit} className="space-y-4 border-t pt-4">
+          <form
+            onSubmit={(e) =>
+              handleFormSubmit({
+                e,
+                editingVenueId,
+                newVenue,
+                setEditingVenueId,
+                setShowForm,
+                setNewVenue,
+                setVenues,
+                setModal,
+              })
+            }
+            className="space-y-4 border-t pt-4"
+          >
             <input
               type="text"
               placeholder="Name"
@@ -258,10 +239,7 @@ export default function ManagerProfile() {
               placeholder="Max Guests"
               value={newVenue.maxGuests}
               onChange={(e) =>
-                setNewVenue({
-                  ...newVenue,
-                  maxGuests: Number(e.target.value),
-                })
+                setNewVenue({ ...newVenue, maxGuests: Number(e.target.value) })
               }
               required
               className="w-full border rounded px-3 py-2"
@@ -276,7 +254,6 @@ export default function ManagerProfile() {
               }
               className="w-full border rounded px-3 py-2"
             />
-
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
               <input
                 type="text"
@@ -324,7 +301,6 @@ export default function ManagerProfile() {
                 className="border rounded px-3 py-2"
               />
             </div>
-
             <div className="flex flex-wrap gap-4">
               {['wifi', 'parking', 'breakfast', 'pets'].map((feature) => (
                 <label
@@ -348,7 +324,6 @@ export default function ManagerProfile() {
                 </label>
               ))}
             </div>
-
             <button
               type="submit"
               className="bg-accent text-white py-2 px-4 rounded hover:opacity-90"

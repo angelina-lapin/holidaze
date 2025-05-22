@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getEnrichedBookings } from '../api/holidaze';
-import { handleAvatarUpdate } from '../utils/handleAvatarUpdate';
+import { handleAvatarChangeSubmit } from '../utils/handleAvatarChangeSubmit';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Modal from '../components/Modal';
@@ -36,37 +36,38 @@ export default function UserProfilePage() {
 
   if (!user) return null;
 
-  function handleAvatarChangeSubmit(e) {
-    e.preventDefault();
-    handleAvatarUpdate({
-      user,
-      avatarUrl: newAvatar,
-      setUser,
-      setModal,
-    });
-    setNewAvatar('');
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-secondary">
       <Navbar />
-      <main className="flex-grow max-w-4xl mx-auto px-4 py-8">
+      <main className="flex-grow max-w-4xl mx-auto px-4 py-8 w-full">
         <h1 className="text-3xl font-bold mb-6">Welcome, {user.name}!</h1>
 
-        <div className="mb-8 flex items-center gap-4">
+        <div className="mb-8 flex flex-col sm:flex-row items-center gap-4">
           <img
             src={user.avatar?.url || 'https://via.placeholder.com/100'}
             alt="avatar"
-            className="w-24 h-24 rounded-full object-cover border"
+            className="w-24 h-24 max-w-full rounded-full object-cover border"
           />
-          <form onSubmit={handleAvatarChangeSubmit} className="flex gap-2">
+          <form
+            onSubmit={(e) =>
+              handleAvatarChangeSubmit({
+                e,
+                user,
+                newAvatar,
+                setUser,
+                setModal,
+                setNewAvatar,
+              })
+            }
+            className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto"
+          >
             <input
               type="url"
               placeholder="New avatar URL"
               value={newAvatar}
               onChange={(e) => setNewAvatar(e.target.value)}
               required
-              className="border rounded px-3 py-1 w-64"
+              className="border rounded px-3 py-1 w-full sm:w-64"
             />
             <button
               type="submit"

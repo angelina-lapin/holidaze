@@ -27,13 +27,15 @@ export default function Home() {
     loadData();
   }, []);
 
-  const filteredVenues = venues.filter((venue) =>
-    locationFilter
-      ? venue.location?.city
-          ?.toLowerCase()
-          .includes(locationFilter.toLowerCase())
-      : true
-  );
+  const filteredVenues = venues.filter((v) => {
+    const search = searchParams.get('location')?.toLowerCase() || '';
+    return (
+      v.location?.city?.toLowerCase().includes(search) ||
+      v.location?.country?.toLowerCase().includes(search) ||
+      v.location?.address?.toLowerCase().includes(search) ||
+      v.name?.toLowerCase().includes(search)
+    );
+  });
 
   const sortedVenues = [...filteredVenues].sort((a, b) => {
     if (sortOrder === 'price-asc') return a.price - b.price;

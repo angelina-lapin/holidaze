@@ -26,8 +26,6 @@ export async function login(email, password) {
 }
 
 export async function register(name, email, password, venueManager = false) {
-  console.log('Registration body:', { name, email, password, venueManager });
-
   const response = await fetch(`${AUTH_URL}/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
