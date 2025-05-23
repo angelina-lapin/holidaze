@@ -9,23 +9,20 @@ import { handleBookingSubmit } from '../utils/handleBooking';
 import ReactDatePicker from 'react-datepicker';
 import { addDays, parseISO, differenceInCalendarDays } from 'date-fns';
 import { getUser } from '../utils/storage';
+import { useModal } from '../hooks/useModal';
 
 export default function VenuePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedRange, setSelectedRange] = useState([null, null]);
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [modal, setModal] = useState({
-    isOpen: false,
-    title: '',
-    message: '',
-    onClose: null,
-  });
   const [guests, setGuests] = useState(1);
 
+  const { modal, openModal, closeModal } = useModal();
   const [startDate, endDate] = selectedRange;
 
   useEffect(() => {
@@ -36,23 +33,6 @@ export default function VenuePage() {
     }
     fetchVenue();
   }, [id]);
-
-  const onSubmit = (e) => {
-    const user = getUser();
-    handleBookingSubmit({
-      e,
-      user,
-      venueId: venue.id,
-      startDate,
-      endDate,
-      guests,
-      bookedDates,
-      setModal,
-      setShowBookingForm,
-      setSelectedRange,
-      navigate,
-    });
-  };
 
   if (loading) {
     return (
@@ -72,6 +52,7 @@ export default function VenuePage() {
 
   const images =
     venue.media?.filter((img) => img.url?.startsWith('http')) || [];
+
   const bookedDates =
     venue.bookings?.flatMap((booking) => {
       const start = parseISO(booking.dateFrom);
@@ -86,6 +67,23 @@ export default function VenuePage() {
   const numberOfNights =
     startDate && endDate ? differenceInCalendarDays(endDate, startDate) : 0;
   const totalPrice = numberOfNights * venue.price;
+
+  const onSubmit = (e) => {
+    const user = getUser();
+    handleBookingSubmit({
+      e,
+      user,
+      venueId: venue.id,
+      startDate,
+      endDate,
+      guests,
+      bookedDates,
+      setModal: openModal,
+      setShowBookingForm,
+      setSelectedRange,
+      navigate,
+    });
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-secondary">
@@ -106,7 +104,7 @@ export default function VenuePage() {
             <img
               src={images[activeImageIndex].url}
               alt={images[activeImageIndex].alt || 'Venue image'}
-              className="w-full h-64 object-cover rounded-md mb-4 transition duration-300 ease-in-out"
+              className="w-full h-64 object-cover rounded-md mb-4"
             />
             <div className="flex gap-2 mb-4 overflow-x-auto">
               {images.map((img, index) => (
@@ -217,7 +215,7 @@ export default function VenuePage() {
                     <input
                       type="text"
                       required
-                      className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-accent"
                     />
                   </div>
                   <div>
@@ -225,7 +223,7 @@ export default function VenuePage() {
                     <input
                       type="email"
                       required
-                      className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-accent"
                     />
                   </div>
                   <div>
@@ -236,7 +234,7 @@ export default function VenuePage() {
                       value={guests}
                       onChange={(e) => setGuests(Number(e.target.value))}
                       required
-                      className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent"
+                      className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-accent"
                     />
                   </div>
                   <button
@@ -266,10 +264,8 @@ export default function VenuePage() {
       <Modal
         isOpen={modal.isOpen}
         onClose={() => {
-          setModal((prev) => {
-            if (prev.onClose) prev.onClose();
-            return { ...prev, isOpen: false };
-          });
+          if (modal.onClose) modal.onClose();
+          closeModal();
         }}
         title={modal.title}
         message={modal.message}

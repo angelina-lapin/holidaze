@@ -4,14 +4,16 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Modal from '../components/Modal';
 import { handleRegisterSubmit } from '../utils/handleRegisterSubmit';
+import { useModal } from '../hooks/useModal';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [venueManager, setVenueManager] = useState(false);
-  const [modal, setModal] = useState({ isOpen: false, title: '', message: '' });
+
   const navigate = useNavigate();
+  const { modal, openModal, closeModal } = useModal();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ export default function RegisterPage() {
       email,
       password,
       venueManager,
-      setModal,
+      setModal: openModal,
       navigate,
     });
   };
@@ -93,7 +95,7 @@ export default function RegisterPage() {
       <Modal
         isOpen={modal.isOpen}
         onClose={() => {
-          setModal({ ...modal, isOpen: false });
+          closeModal();
           if (modal.title === 'Registration successful') {
             navigate('/login');
           }

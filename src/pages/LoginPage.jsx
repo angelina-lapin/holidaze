@@ -4,21 +4,18 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Modal from '../components/Modal';
 import { handleLoginSubmit } from '../utils/handleLoginSubmit';
+import { useModal } from '../hooks/useModal';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [modal, setModal] = useState({
-    isOpen: false,
-    title: '',
-    message: '',
-  });
 
   const navigate = useNavigate();
+  const { modal, openModal, closeModal } = useModal();
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    await handleLoginSubmit(email, password, setModal, navigate);
+    await handleLoginSubmit(email, password, openModal, navigate);
   };
 
   return (
@@ -61,7 +58,7 @@ export default function LoginPage() {
       <Footer />
       <Modal
         isOpen={modal.isOpen}
-        onClose={() => setModal({ ...modal, isOpen: false })}
+        onClose={closeModal}
         title={modal.title}
         message={modal.message}
       />

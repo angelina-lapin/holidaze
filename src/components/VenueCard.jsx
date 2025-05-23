@@ -37,7 +37,7 @@ export default function VenueCard({
           </div>
 
           <div className="flex items-center justify-between mb-4">
-            <span className="text-accent font-bold text-lg">${price}</span>
+            <span className="text-accent font-bold text-lg">kr {price}</span>
             <span className="text-yellow-500 text-sm">
               {rating ? '★'.repeat(Math.round(rating)) : 'No rating'}
             </span>

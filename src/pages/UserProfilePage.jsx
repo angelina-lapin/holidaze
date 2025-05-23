@@ -6,20 +6,16 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Modal from '../components/Modal';
 import BookingList from '../components/BookingList';
+import { useModal } from '../hooks/useModal';
 
 export default function UserProfilePage() {
   const [user, setUser] = useState(null);
   const [myBookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState({
-    isOpen: false,
-    title: '',
-    message: '',
-    type: '',
-    onConfirm: null,
-  });
   const [newAvatar, setNewAvatar] = useState('');
   const navigate = useNavigate();
+
+  const { modal, openModal, closeModal } = useModal();
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -55,7 +51,7 @@ export default function UserProfilePage() {
                 user,
                 newAvatar,
                 setUser,
-                setModal,
+                setModal: openModal,
                 setNewAvatar,
               })
             }
@@ -88,14 +84,16 @@ export default function UserProfilePage() {
           bookings={myBookings}
           loading={loading}
           user={user}
-          setModal={setModal}
+          setModal={openModal}
           setBookings={setBookings}
         />
       </main>
+
       <Footer />
+
       <Modal
         isOpen={modal.isOpen}
-        onClose={() => setModal((prev) => ({ ...prev, isOpen: false }))}
+        onClose={closeModal}
         title={modal.title}
         message={modal.message}
         type={modal.type}
