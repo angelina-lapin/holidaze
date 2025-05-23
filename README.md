@@ -18,21 +18,18 @@ Venue managers can:
 - Calendar view with available booking dates
 - Role-based authentication (Customer / Venue Manager)
 - API integration using modern JavaScript
-- Styled with Tailwind CSS (or Bootstrap / MUI)
-- Figma design system and prototype
+- Styled with Bootstrap
+- Figma design system and prototype [Figma](https://www.figma.com/design/bywLdUqMobUcunnr0xxnQ6/Holidaze?node-id=3-2&t=UNld5nAWAAgNJLE3-1)
 
 ## Tech Stack
 
 - React
-- JavaScript / TypeScript (optional)
-- Tailwind CSS / Bootstrap / MUI
+- JavaScript 
+- Bootstrap 
 - GitHub Projects for planning
 - Figma for design
-- Deployed on GitHub Pages / Netlify / Vercel
+- Deployed on Netlify 
 
-## Project Plan
-
-See full project plan in [holidaze-project-plan.md](./holidaze-project-plan.md)
 
 ## Getting Started
 
@@ -51,8 +48,7 @@ You can follow all tasks and progress through the [GitHub Project Board](https:/
 
 ## Deployment
 
-The final site will be deployed to:
-- [Live Demo (coming soon)](https://angelina-lapin.github.io/holidaze)
+- [Holidaze web site](https://holidazen.netlify.app)
 
 ## License
 
