@@ -192,11 +192,12 @@ export default function ManagerProfile() {
                 e,
                 editingVenueId,
                 newVenue,
+                user,
                 setEditingVenueId,
                 setShowForm,
                 setNewVenue,
                 setVenues,
-                setModal,
+                setModal: openModal,
               })
             }
             className="space-y-4 border-t pt-4"

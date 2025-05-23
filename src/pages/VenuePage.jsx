@@ -23,6 +23,8 @@ export default function VenuePage() {
   const [selectedRange, setSelectedRange] = useState([null, null]);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [guests, setGuests] = useState(1);
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
 
   const [startDate, endDate] = selectedRange;
 
@@ -73,6 +75,7 @@ export default function VenuePage() {
   const numberOfNights =
     startDate && endDate ? differenceInCalendarDays(endDate, startDate) : 0;
   const totalPrice = numberOfNights * venue.price;
+
   const onSubmit = (e) => {
     handleBookingSubmit({
       e,
@@ -101,7 +104,12 @@ export default function VenuePage() {
           ← Back
         </button>
 
-        <h1 className="text-3xl font-bold mb-4">{venue.name}</h1>
+        <h1 className="text-3xl font-bold mb-2">{venue.name}</h1>
+        {venue.rating && (
+          <p className="text-lg font-medium text-muted mb-4">
+            Rating: {venue.rating.toFixed(1)} / 5
+          </p>
+        )}
 
         {images.length > 0 ? (
           <>
@@ -175,6 +183,7 @@ export default function VenuePage() {
           </ul>
         </div>
 
+        {/* Календарь и форма */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="flex-1">
@@ -225,6 +234,8 @@ export default function VenuePage() {
                     <input
                       type="text"
                       required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-accent"
                     />
                   </div>
@@ -233,6 +244,8 @@ export default function VenuePage() {
                     <input
                       type="email"
                       required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-accent"
                     />
                   </div>

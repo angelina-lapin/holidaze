@@ -14,6 +14,7 @@ export async function handleDeleteBooking({
     if (setModal) {
       setModal({
         isOpen: true,
+        type: 'info',
         title: 'Booking cancelled',
         message: 'The booking was successfully deleted.',
       });

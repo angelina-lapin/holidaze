@@ -5,12 +5,15 @@ export function handleFormSubmit({
   e,
   editingVenueId,
   newVenue,
+  user,
   setEditingVenueId,
   setShowForm,
   setNewVenue,
   setVenues,
   setModal,
 }) {
+  e.preventDefault();
+
   if (editingVenueId) {
     handleUpdateVenue(
       e,
@@ -30,7 +33,7 @@ export function handleFormSubmit({
       setShowForm,
       setNewVenue,
       setVenues,
-      openModal
+      setModal
     );
   }
 }
