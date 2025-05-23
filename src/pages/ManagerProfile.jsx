@@ -2,19 +2,20 @@ import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import Modal from '../components/Modal';
+import EmptyState from '../components/EmptyState';
 import BookingList from '../components/BookingList';
 import { useNavigate } from 'react-router-dom';
-import { getUser } from '../utils/storage';
 import { getVenuesByManager, getEnrichedBookings } from '../api/holidaze';
 import { handleSubmit } from '../utils/handleSubmit';
 import { handleUpdateVenue } from '../utils/handleUpdateVenue';
 import { handleDeleteVenue } from '../utils/handleDeleteVenue';
 import { handleAvatarChangeSubmit } from '../utils/handleAvatarChangeSubmit';
+import { useUser } from '../hooks/useUser';
 import { useModal } from '../hooks/useModal';
 
 export default function ManagerProfile() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(getUser());
+  const { user, setUser } = useUser();
   const [venues, setVenues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -146,11 +147,12 @@ export default function ManagerProfile() {
         </div>
 
         <h2 className="text-2xl font-semibold mt-10 mb-4">Your Venues</h2>
-        {loading ? (
-          <p>Loading venues...</p>
-        ) : venues.length === 0 ? (
-          <p>You have not created any venues yet.</p>
-        ) : (
+        <EmptyState
+          loading={loading}
+          items={venues}
+          message="You have not created any venues yet."
+        />
+        {!loading && venues.length > 0 && (
           <div className="grid gap-6 sm:grid-cols-2">
             {venues.map((venue) => (
               <div key={venue.id} className="bg-white rounded shadow p-4">

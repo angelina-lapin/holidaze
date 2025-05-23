@@ -3,11 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { getUser } from '../utils/storage';
 import { handleLogout } from '../utils/handleLogout';
 import { handleProfileClick } from '../utils/handleProfileClick';
+import { useUser } from '../hooks/useUser';
 
 export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState(getUser());
+  const { user, setUser } = useUser();
 
   useEffect(() => {
     setUser(getUser());

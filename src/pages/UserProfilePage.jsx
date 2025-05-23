@@ -1,61 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getEnrichedBookings } from '../api/holidaze';
-import { handleAvatarChangeSubmit } from '../utils/handleAvatarChangeSubmit';
+import { handleAvatarUpdate } from '../utils/handleAvatarUpdate';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import Modal from '../components/Modal';
 import BookingList from '../components/BookingList';
+import Modal from '../components/Modal';
+import EmptyState from '../components/EmptyState';
 import { useModal } from '../hooks/useModal';
+import { useUser } from '../hooks/useUser';
 
 export default function UserProfilePage() {
-  const [user, setUser] = useState(null);
+  const { user, setUser } = useUser();
   const [myBookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [newAvatar, setNewAvatar] = useState('');
   const navigate = useNavigate();
-
   const { modal, openModal, closeModal } = useModal();
+  const [newAvatar, setNewAvatar] = useState('');
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem('user'));
-    if (!storedUser) {
+    if (!user) {
       navigate('/login');
-    } else {
-      setUser(storedUser);
-      getEnrichedBookings(storedUser.name)
-        .then(setBookings)
-        .catch((err) => console.error('Failed to load bookings', err))
-        .finally(() => setLoading(false));
+      return;
     }
-  }, [navigate]);
+
+    getEnrichedBookings(user.name)
+      .then(setBookings)
+      .catch((err) => console.error('Failed to load bookings', err))
+      .finally(() => setLoading(false));
+  }, [user, navigate]);
+
+  const handleAvatarChangeSubmit = (e) => {
+    e.preventDefault();
+    if (!user) return;
+    handleAvatarUpdate({
+      user,
+      avatarUrl: newAvatar,
+      setUser,
+      setModal: openModal,
+    });
+    setNewAvatar('');
+  };
 
   if (!user) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-secondary">
       <Navbar />
-      <main className="flex-grow max-w-4xl mx-auto px-4 py-8 w-full">
+      <main className="flex-grow max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Welcome, {user.name}!</h1>
 
+        {/* Аватар и форма */}
         <div className="mb-8 flex flex-col sm:flex-row items-center gap-4">
           <img
             src={user.avatar?.url || 'https://via.placeholder.com/100'}
             alt="avatar"
-            className="w-24 h-24 max-w-full rounded-full object-cover border"
+            className="w-24 h-24 rounded-full object-cover border"
           />
           <form
-            onSubmit={(e) =>
-              handleAvatarChangeSubmit({
-                e,
-                user,
-                newAvatar,
-                setUser,
-                setModal: openModal,
-                setNewAvatar,
-              })
-            }
-            className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto"
+            onSubmit={handleAvatarChangeSubmit}
+            className="flex gap-2 w-full sm:w-auto"
           >
             <input
               type="url"
@@ -80,17 +84,21 @@ export default function UserProfilePage() {
         </p>
 
         <h2 className="text-2xl font-semibold mb-4">Upcoming bookings</h2>
-        <BookingList
-          bookings={myBookings}
+        <EmptyState
           loading={loading}
-          user={user}
-          setModal={openModal}
-          setBookings={setBookings}
+          items={myBookings}
+          message="You have no bookings yet."
         />
+        {!loading && myBookings.length > 0 && (
+          <BookingList
+            bookings={myBookings}
+            user={user}
+            setModal={openModal}
+            setBookings={setBookings}
+          />
+        )}
       </main>
-
       <Footer />
-
       <Modal
         isOpen={modal.isOpen}
         onClose={closeModal}
