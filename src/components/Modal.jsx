@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function Modal({
   isOpen,
   onClose,
@@ -7,6 +5,8 @@ export default function Modal({
   message,
   type = 'info',
   onConfirm,
+  confirmLabel = 'Yes',
+  cancelLabel = 'No',
 }) {
   if (!isOpen) return null;
 
@@ -22,7 +22,7 @@ export default function Modal({
               onClick={onClose}
               className="px-4 py-2 text-sm rounded bg-gray-300 text-gray-800 hover:bg-gray-400"
             >
-              No
+              {cancelLabel}
             </button>
             <button
               onClick={() => {
@@ -31,7 +31,7 @@ export default function Modal({
               }}
               className="px-4 py-2 text-sm rounded bg-accent text-white hover:opacity-90"
             >
-              Yes, cancel
+              {confirmLabel}
             </button>
           </div>
         ) : (

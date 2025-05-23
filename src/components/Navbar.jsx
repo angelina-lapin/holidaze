@@ -10,10 +10,6 @@ export default function Navbar() {
   const location = useLocation();
   const { user, setUser } = useUser();
 
-  useEffect(() => {
-    setUser(getUser());
-  }, [location]);
-
   return (
     <header className="bg-primary text-white shadow-md">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">

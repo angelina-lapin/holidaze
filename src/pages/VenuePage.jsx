@@ -8,12 +8,14 @@ import { getVenueById } from '../api/holidaze';
 import { handleBookingSubmit } from '../utils/handleBooking';
 import ReactDatePicker from 'react-datepicker';
 import { addDays, parseISO, differenceInCalendarDays } from 'date-fns';
-import { getUser } from '../utils/storage';
+import { useUser } from '../hooks/useUser';
 import { useModal } from '../hooks/useModal';
 
 export default function VenuePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useUser();
+  const { modal, openModal, closeModal } = useModal();
 
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +24,6 @@ export default function VenuePage() {
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [guests, setGuests] = useState(1);
 
-  const { modal, openModal, closeModal } = useModal();
   const [startDate, endDate] = selectedRange;
 
   useEffect(() => {
@@ -36,8 +37,13 @@ export default function VenuePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen bg-secondary px-4 py-12 flex justify-center items-start">
+        <div className="w-full max-w-5xl space-y-6">
+          <div className="h-10 bg-white rounded animate-pulse w-1/2" />
+          <div className="h-64 bg-white rounded animate-pulse" />
+          <div className="h-24 bg-white rounded animate-pulse" />
+          <div className="h-10 bg-white rounded animate-pulse w-1/3" />
+        </div>
       </div>
     );
   }
@@ -67,9 +73,7 @@ export default function VenuePage() {
   const numberOfNights =
     startDate && endDate ? differenceInCalendarDays(endDate, startDate) : 0;
   const totalPrice = numberOfNights * venue.price;
-
   const onSubmit = (e) => {
-    const user = getUser();
     handleBookingSubmit({
       e,
       user,
@@ -131,6 +135,12 @@ export default function VenuePage() {
         )}
 
         <p className="text-muted mb-4">{venue.description}</p>
+
+        {venue.rating && (
+          <div className="mb-4 text-sm text-accent font-medium">
+            Rating: {venue.rating.toFixed(1)} ★
+          </div>
+        )}
         <div className="text-sm text-gray-600 mb-2">
           Location: {venue.location?.city}, {venue.location?.country}
         </div>
@@ -248,7 +258,20 @@ export default function VenuePage() {
 
               {!showBookingForm && startDate && endDate && (
                 <button
-                  onClick={() => setShowBookingForm(true)}
+                  onClick={() => {
+                    if (!user) {
+                      openModal({
+                        title: 'Login required',
+                        message: 'To book this venue, you must log in first.',
+                        type: 'confirm',
+                        confirmLabel: 'Go to Login',
+                        cancelLabel: 'Close',
+                        onConfirm: () => navigate('/login'),
+                      });
+                    } else {
+                      setShowBookingForm(true);
+                    }
+                  }}
                   className="w-full mt-4 bg-accent text-white py-2 px-4 rounded hover:opacity-90"
                 >
                   Book now
@@ -269,6 +292,10 @@ export default function VenuePage() {
         }}
         title={modal.title}
         message={modal.message}
+        type={modal.type}
+        onConfirm={modal.onConfirm}
+        confirmLabel={modal.confirmLabel}
+        cancelLabel={modal.cancelLabel}
       />
     </div>
   );

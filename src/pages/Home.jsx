@@ -59,11 +59,11 @@ export default function Home() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
           {isLoading
-            ? Array.from({ length: 8 }).map((_, i) => (
+            ? Array.from({ length: visibleCount }).map((_, i) => (
                 <div
                   key={i}
-                  className="bg-white h-64 rounded-lg shadow animate-pulse"
-                ></div>
+                  className="bg-white rounded-lg shadow h-64 animate-pulse"
+                />
               ))
             : visibleVenues.map((venue) => (
                 <VenueCard

@@ -23,6 +23,14 @@ export function handleFormSubmit({
       setModal
     );
   } else {
-    handleSubmit(e, newVenue, setShowForm, setNewVenue, setVenues);
+    handleSubmit(
+      e,
+      newVenue,
+      user,
+      setShowForm,
+      setNewVenue,
+      setVenues,
+      openModal
+    );
   }
 }

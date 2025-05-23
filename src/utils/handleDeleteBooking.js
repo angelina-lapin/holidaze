@@ -6,9 +6,6 @@ export async function handleDeleteBooking({
   setBookings,
   setModal,
 }) {
-  const confirmed = confirm('Are you sure you want to cancel this booking?');
-  if (!confirmed) return;
-
   try {
     await deleteBooking(bookingId);
     const updated = await getEnrichedBookings(profileName);

@@ -1,21 +1,24 @@
 import { getHeaders } from '../api/headers';
 import { BASE_URL } from '../api/constants';
-import { getUser } from './storage';
 import { getVenuesByManager } from '../api/holidaze';
 
 export async function handleSubmit(
   e,
   newVenue,
+  user,
   setShowForm,
   setNewVenue,
-  setVenues
+  setVenues,
+  openModal
 ) {
   e.preventDefault();
 
-  const user = getUser();
   if (!user || !user.name) {
-    alert('User not authenticated');
-    return;
+    return openModal({
+      isOpen: true,
+      title: 'Error',
+      message: 'User not authenticated.',
+    });
   }
 
   const payload = {
@@ -70,8 +73,18 @@ export async function handleSubmit(
       location: { address: '', city: '', country: '' },
       meta: { wifi: false, parking: false, breakfast: false, pets: false },
     });
+
+    openModal({
+      isOpen: true,
+      title: 'Success',
+      message: `Venue "${created.data.name}" was created successfully!`,
+    });
   } catch (error) {
     console.error('Error creating venue:', error);
-    alert(error.message || 'Failed to create venue');
+    openModal({
+      isOpen: true,
+      title: 'Error',
+      message: error.message || 'Failed to create venue.',
+    });
   }
 }

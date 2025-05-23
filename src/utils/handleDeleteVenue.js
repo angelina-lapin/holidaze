@@ -1,9 +1,13 @@
 import { BASE_URL } from '../api/constants';
 import { getHeaders } from '../api/headers';
-import { getUser } from './storage';
 import { getVenuesByManager } from '../api/holidaze';
 
-export async function handleDeleteVenue(venueId, setVenues, setModal) {
+export async function handleDeleteVenue(
+  venueId,
+  userName,
+  setVenues,
+  setModal
+) {
   try {
     const headers = getHeaders();
 
@@ -16,8 +20,7 @@ export async function handleDeleteVenue(venueId, setVenues, setModal) {
       throw new Error('Failed to delete venue');
     }
 
-    const user = getUser();
-    const updatedVenues = await getVenuesByManager(user.name);
+    const updatedVenues = await getVenuesByManager(userName);
     setVenues(updatedVenues);
 
     setModal({

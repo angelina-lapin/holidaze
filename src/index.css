@@ -95,3 +95,22 @@ input:focus {
   pointer-events: none !important;
   border-radius: 0.3rem !important;
 }
+
+.react-datepicker__day--range-start {
+  background-color: #e5989b !important;
+  color: white !important;
+  border-radius: 50% !important;
+}
+
+.react-datepicker__day--range-end {
+  background-color: #e5989b !important;
+  color: white !important;
+  border-radius: 50% !important;
+}
+
+.react-datepicker__day--in-selecting-range,
+.react-datepicker__day--in-range {
+  background-color: #f8d6c8 !important;
+  color: #6d6875 !important;
+  border-radius: 0.3rem;
+}
