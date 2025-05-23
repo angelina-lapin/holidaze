@@ -94,6 +94,11 @@ export default function ManagerProfile() {
           </form>
         </div>
 
+        <p className="mb-2 text-gray-600">Email: {user.email}</p>
+        <p className="mb-6 text-gray-600">
+          Role: {user.venueManager ? 'Venue Manager' : 'Customer'}
+        </p>
+
         <h2 className="text-2xl font-semibold mt-10 mb-4">Your Venues</h2>
         <EmptyState
           loading={loading}

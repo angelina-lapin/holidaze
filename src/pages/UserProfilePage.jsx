@@ -50,7 +50,6 @@ export default function UserProfilePage() {
       <main className="flex-grow max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">Welcome, {user.name}!</h1>
 
-        {/* Аватар и форма */}
         <div className="mb-8 flex flex-col sm:flex-row items-center gap-4">
           <img
             src={user.avatar?.url || 'https://via.placeholder.com/100'}

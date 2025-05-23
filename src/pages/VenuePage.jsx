@@ -183,7 +183,6 @@ export default function VenuePage() {
           </ul>
         </div>
 
-        {/* Календарь и форма */}
         <div className="mb-8">
           <div className="flex flex-col lg:flex-row gap-8">
             <div className="flex-1">
